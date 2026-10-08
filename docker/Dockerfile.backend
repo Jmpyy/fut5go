@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar manifiestos
+COPY apps/backend/package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar código fuente
+COPY apps/backend/ ./
+
+EXPOSE 4000
+
+CMD ["npm", "run", "dev"]

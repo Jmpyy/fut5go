@@ -1,0 +1,28 @@
+{
+  "name": "fut5go",
+  "version": "0.1.0",
+  "description": "Plataforma integral para gestión de canchas de fútbol 5/7, reservas online y torneos locales",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "keywords": [
+    "futbol",
+    "canchas",
+    "reservas",
+    "torneos",
+    "saas",
+    "turf",
+    "soccer"
+  ],
+  "author": "Equipo Fut5Go",
+  "license": "MIT"
+}

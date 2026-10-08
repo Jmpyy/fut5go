@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Base de Datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: fut5go-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-fut5go_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret_password}
+      POSTGRES_DB: ${DB_NAME:-fut5go_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fut5go-network
+
+  # Redis para Bloqueo de Concurrencia y Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fut5go-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - fut5go-network
+
+  # Backend API
+  backend:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.backend
+    container_name: fut5go-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://${DB_USER:-fut5go_admin}:${DB_PASSWORD:-secret_password}@postgres:5432/${DB_NAME:-fut5go_db}?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ../apps/backend:/app
+      - /app/node_modules
+    networks:
+      - fut5go-network
+
+  # Frontend Web
+  frontend:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.frontend
+    container_name: fut5go-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      VITE_API_BASE_URL: http://localhost:4000/api
+    depends_on:
+      - backend
+    volumes:
+      - ../apps/frontend:/app
+      - /app/node_modules
+    networks:
+      - fut5go-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  fut5go-network:
+    driver: bridge

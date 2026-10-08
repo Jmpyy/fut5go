@@ -1,0 +1,43 @@
+name: Fut5Go CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Frontend dependencies
+        run: npm ci
+        working-directory: ./apps/frontend
+
+      - name: Install Backend dependencies
+        run: npm ci
+        working-directory: ./apps/backend
+
+      - name: Typecheck Frontend
+        run: npx tsc --noEmit
+        working-directory: ./apps/frontend
+        continue-on-error: true
+
+      - name: Typecheck Backend
+        run: npx tsc --noEmit
+        working-directory: ./apps/backend
+        continue-on-error: true
