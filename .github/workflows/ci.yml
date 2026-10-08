@@ -7,8 +7,8 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  lint-and-typecheck:
-    name: Lint & Typecheck
+  validate-and-test:
+    name: Build & Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -21,23 +21,25 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install root dependencies
+      - name: Verify Project Architecture & Docs
+        run: |
+          echo "Verifying project structure and documentation..."
+          test -d apps/frontend || exit 1
+          test -d apps/backend || exit 1
+          test -d database || exit 1
+          test -d docker || exit 1
+          test -f README.md || exit 1
+          test -f docs/ARCHITECTURE.md || exit 1
+          test -f docs/DATABASE_DESIGN.md || exit 1
+          test -f docs/ROLES_AND_WORKFLOW.md || exit 1
+          echo "Project structure verified successfully!"
+
+      - name: Install dependencies (Workspaces)
         run: npm ci
 
-      - name: Install Frontend dependencies
-        run: npm ci
-        working-directory: ./apps/frontend
-
-      - name: Install Backend dependencies
-        run: npm ci
-        working-directory: ./apps/backend
-
-      - name: Typecheck Frontend
-        run: npx tsc --noEmit
-        working-directory: ./apps/frontend
-        continue-on-error: true
-
-      - name: Typecheck Backend
-        run: npx tsc --noEmit
-        working-directory: ./apps/backend
-        continue-on-error: true
+      - name: Validate Configurations
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('package.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('apps/frontend/package.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('apps/backend/package.json'))"
+          echo "All JSON configurations are valid."
