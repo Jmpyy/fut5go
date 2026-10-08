@@ -151,7 +151,7 @@ Para trabajar de manera ordenada entre los 3 sin pisarse código:
 
 ### Clonar el Repositorio
 ```bash
-git clone https://github.com/TU_USUARIO/fut5go.git
+git clone https://github.com/Jmpyy/fut5go.git
 cd fut5go
 ```
 
